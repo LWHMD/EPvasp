@@ -1,0 +1,2 @@
+1. Rewrite the program that used to extract data from PROCAR.
+2. Add one function to extract data of some bands at one certain k-point.
