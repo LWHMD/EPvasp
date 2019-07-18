@@ -713,10 +713,25 @@ def band_kpoint_PROCAR():
             j+=1
             #print (j)
         i+=1
-        print(k)
         bandsx=kpoint_detail[k+ions+3]
         bandsx=bandsx[:-1]
         write2txt('procar_bands_kpoint.dat',bandsx)
+    write2txt('procar_bands_kpoint.dat','') #empty line
+
+    i=0
+    while i < len(SOME_bands):
+        j=0
+        for component_line in kpoint_detail:
+            component=component_line.split()
+            if 'band ' in component_line and str(SOME_bands[i]) == component[1]:
+                k=j
+                for x in range(k-1,k+ions+4,1):
+                    bandsx=kpoint_detail[x]
+                    bandsx=bandsx[:-1]
+                    write2txt('procar_bands_kpoint.dat',bandsx)
+            j+=1
+        i+=1
+
 
 
     # used to choose the mode you want to calculate
