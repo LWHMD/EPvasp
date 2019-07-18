@@ -11,7 +11,7 @@
 #              POSCAR, fermi.dat                          #
 #              KPOINTS.DFT(HSE),                          #
 # run command: python3.4 VaspToolX.py                     #
-# Author     : Leiwang  updata 2019/05/12                 #
+# Author     : Leiwang  updata 2019/07/18                #
 ###########################################################
 # The version copy from ubuntu
 
@@ -21,9 +21,13 @@
 
 # creat it by : grep fermi OUTCAR > fermi.dat
 
-import numpy as np
-from sympy import *
+#import numpy as np
+#$from sympy import *
+import math
+import os
 
+pi = math.pi
+sqrt = math.sqrt
 #  used to read data from file
 def read_data(filename):
     with open(filename, 'r') as f:
@@ -212,37 +216,22 @@ def project_orbit():
     lines0 = read_data('POSCAR')     #read  POSCAR
     lines1 = read_data('KPOINTS')
     lines3 = read_data('PROCAR')
-    pi = np.pi
 
     # begin to extract the orbit component from PROCAR
-    print (lines0[5])
-    while True:
-        element = str(input('input the kind of element:'))
-        if element not in lines0[5]:
-            print('the element is not right, please input it again')
-            continue
-        else:
-            break
+    #print (lines0[5])
+    #while True:
+    #element = str(input('input the kind of element:'))
+    #    if element not in lines0[5]:
+    #        print('the element is not right, please input it again')
+    #        continue
+    #    else:
+    #        break
 
-    N_A = 0
-    N_i = 0
-    Num_A = 0
-    if element in lines0[5]:
-        Element=lines0[5].split()
-        Num_A=lines0[6].split()
-        #print (Element)
-        #print (Num_A)
-        i = 0
-        while i< len(Element):
-            N_A = N_A + int(Num_A[i])
-            if Element[i] == element:
-                N_i = i
-                break
-            i += 1
-        #print(N_A,i)
+
 
     # extract data in two mode soc or nosoc
-    mode = int(input('spd input 1; s px py pz dxy dyz dz2 dxz dx2 input 2:'))   # LORBIT
+    #mode = int(input('spd input 1; s px py pz dxy dyz dz2 dxz dx2 input 2:'))   # LORBIT
+    mode = 2
     LSO = int(input('nosoc input 1; soc input 2:'))     # LSORBIT
     mag = int(input('nonmagnetic 1; magnetic 2:'))   # ISPIN equal to 1 or 2
     efermi = fermienergy('fermi.dat')
@@ -266,69 +255,126 @@ def project_orbit():
     else:
         tb_betw=(ni+1)*4+4
 
-    #print (nk,nb,ni)
-    for m in range(0,mag,1):
-        #print('m',m)
-        for i_nb in range(0,nb,1):  #bands
-            for i_nk in range(0,nk,1):   #kpoints
-            #print(i)
-                nkblock = tb_betw*nb+3    # the number of line between two adjacent k-block, such k-points 1 and k-points 2
-                #print('nkblock:',nkblock)
-                k_tmp = lines3[3+i_nk*nkblock]        # the  fractional coordinate of k-points
-                k = k_tmp[19:52]
-                A = N_A-int(Num_A[N_i])+1
-                s = 0;p = 0;d = 0
-                px=0;py=0;pz=0;dxy=0;dyz=0;dxz=0;dx2=0;dz2=0
-                Energy = lines3[i_nk*nkblock+2+(tb_betw*(i_nb)+3)+m*(nk*nkblock+1)]
-                #print(Energy)
-                Energy = Energy.split()
-                energy = float(Energy[4])-efermi
-                #print(Energy)
+    N_A = 0
+    N_i = 0
+    Num_A = []
+    #if element in lines0[5]:
+    Element=lines0[5].split()
+    Num_A=lines0[6].split()
+        #print (Element)
+        #print (Num_A)
+    i = 0
+    while i< len(Element):
+        N_A = N_A + int(Num_A[i])
+        for m in range(0,mag,1):
+            #print('m',m)
+            for i_nb in range(0,nb,1):  #bands
+                for i_nk in range(0,nk,1):   #kpoints
+                #print(i)
+                    nkblock = tb_betw*nb+3    # the number of line between two adjacent k-block, such k-points 1 and k-points 2
+                    #print('nkblock:',nkblock)
+                    k_tmp = lines3[3+i_nk*nkblock]        # the  fractional coordinate of k-points
+                    k = k_tmp[19:52]
+                    A = N_A-int(Num_A[N_i])+1
+                    s = 0;p = 0;d = 0
+                    px=0;py=0;pz=0;dxy=0;dyz=0;dxz=0;dx2=0;dz2=0
+                    Energy = lines3[i_nk*nkblock+2+(tb_betw*(i_nb)+3)+m*(nk*nkblock+1)]
+                    #print(Energy)
+                    Energy = Energy.split()
+                    energy = float(Energy[4])-efermi
+                    #print(Energy)
+                    if mode == 1:
+                        for j in range(A,N_A+1,1):          #  To choose the line the atom that you choose located in
+                            #print (j)
+                            xx_tmp = lines3[i_nk*nkblock+2+(tb_betw*(i_nb)+3)+j+2+m*(nk*nkblock+1)]      # the line include the atom that you choose under nk,nb
+                            #print (xx_tmp)
+                            xx = xx_tmp.split()
+                            s = s + float(xx[1])       #    s
+                            #p = p + float(xx[2])+float(xx[3])+float(xx[4])   #     py     pz     px
+                            p = p + float(xx[2])+float(xx[3])+float(xx[4])
+                            d = d + float(xx[5])+ float(xx[6])+float(xx[7])+float(xx[8])+float(xx[9])   #    dxy    dyz    dz2    dxz    dx2
+                            #d = d + float(xx[5])+ float(xx[6])+float(xx[7])+float(xx[8])+float(xx[9])
+                        #write2txt('band-spd-'+element+'.txt',str(i_nb+1)+'\t'+str(L_k_mesh_list[i_nk])+'\t'+str(energy)+'\t'+str(s)+'\t'+str(p)+'\t'+str(d))
+                        write2txt('band-s-'+Element[i]+'.dat',str(L_k_mesh_list[i_nk])+'\t'+str(energy)+'\t'+str(s))
+                        write2txt('band-pxpy-'+Element[i]+'.dat',str(L_k_mesh_list[i_nk])+'\t'+str(energy)+'\t'+str(p))
+                        write2txt('band-d-'+Element[i]+'.dat',str(L_k_mesh_list[i_nk])+'\t'+str(energy)+'\t'+str(d))
+                    else:
+                        for j in range(A,N_A+1,1):
+                            #print (j)
+                            xx_tmp = lines3[i_nk*nkblock+5+tb_betw*(i_nb)+j+2+m*(nk*nkblock+1)]
+                            #print (xx_tmp)
+                            xx = xx_tmp.split()
+                            s = s + float(xx[1])
+                            px = px + float(xx[2])
+                            py = py + float(xx[3])
+                            pz = pz + float(xx[4])
+                            dxy = dxy + float(xx[5])
+                            dyz = dyz + float(xx[6])
+                            dz2 = dz2 +float(xx[7])
+                            dxz = dxz +float(xx[8])
+                            dx2 = dx2 +float(xx[9])
+                        write2txt('band-spxdx-'+Element[i]+'.dat',str(L_k_mesh_list[i_nk])+'\t'+str(energy)+'\t'+str(s)+'\t'+str(px)+'\t'+str(py)+'\t'+str(pz)+'\t'+str(dxy)+'\t'+str(dyz)+'\t'+str(dz2)+'\t'+str(dxz)+'\t'+str(dx2))
+                        #write2txt('band-spxdx-'+element+'.dat',str(i_nb+1)+'\t'+str(L_k_mesh_list[i_nk])+'\t'+str(energy)+'\t'+str(s)+'\t'+str(px)+'\t'+str(py)+'\t'+str(pz)+'\t'+str(dxy)+'\t'+str(dyz)+'\t'+str(dz2)+'\t'+str(dxz)+'\t'+str(dx2))
                 if mode == 1:
-                    for j in range(A,N_A+1,1):          #  To choose the line the atom that you choose located in
-                        #print (j)
-                        xx_tmp = lines3[i_nk*nkblock+2+(tb_betw*(i_nb)+3)+j+2+m*(nk*nkblock+1)]      # the line include the atom that you choose under nk,nb
-                        #print (xx_tmp)
-                        xx = xx_tmp.split()
-                        s = s + float(xx[1])       #    s
-                        #p = p + float(xx[2])+float(xx[3])+float(xx[4])   #     py     pz     px
-                        p = p + float(xx[2])+float(xx[4])+float(xx[3])
-                        d = d + float(xx[5])+ float(xx[6])+float(xx[7])+float(xx[8])+float(xx[9])   #    dxy    dyz    dz2    dxz    dx2
-                        #d = d + float(xx[5])+ float(xx[6])+float(xx[7])+float(xx[8])+float(xx[9])
-                    #write2txt('band-spd-'+element+'.txt',str(i_nb+1)+'\t'+str(L_k_mesh_list[i_nk])+'\t'+str(energy)+'\t'+str(s)+'\t'+str(p)+'\t'+str(d))
-                    write2txt('band-s-'+element+'.dat',str(L_k_mesh_list[i_nk])+'\t'+str(energy)+'\t'+str(s))
-                    write2txt('band-pxpy-'+element+'.dat',str(L_k_mesh_list[i_nk])+'\t'+str(energy)+'\t'+str(p))
-                    write2txt('band-d-'+element+'.dat',str(L_k_mesh_list[i_nk])+'\t'+str(energy)+'\t'+str(d))
-                    hsl=high_symmetry_line(lines0,lines1)
-                    for i in range(len(hsl)):
-                        write2txt('high-symmetry-line.dat',str(hsl[i])+'\t'+str(-30))
-                        write2txt('high-symmetry-line.dat',str(hsl[i])+'\t'+str(30))
-                        write2txt('high-symmetry-line.dat',' ')
-                    write2txt('high-symmetry-line.dat',str(0)+'\t'+str(0))
-                    write2txt('high-symmetry-line.dat',str(hsl[0])+'\t'+str(hsl[len(hsl)-1]))
+                    #write2txt('band-spd-'+element+'.txt',str( )+'\t')    # space
+                    write2txt('band-s-'+Element[i]+'.dat',str( )+'\t')
+                    write2txt('band-pxpy-'+Element[i]+'.dat',str( )+'\t')
+                    write2txt('band-d-'+Element[i]+'.dat',str( )+'\t')
                 else:
-                    for j in range(A,N_A+1,1):
-                        #print (j)
-                        xx_tmp = lines3[i_nk*nkblock+5+tb_betw*(i_nb)+j+2+m*(nk*nkblock+1)]
-                        #print (xx_tmp)
-                        xx = xx_tmp.split()
-                        s = s + float(xx[1])
-                        px = px + float(xx[2])
-                        py = py + float(xx[3])
-                        pz = pz + float(xx[4])
-                        dxy = dxy + float(xx[5])
-                        dyz = dyz + float(xx[6])
-                        dz2 = dz2 +float(xx[7])
-                        dxz = dxz +float(xx[8])
-                        dx2 = dx2 +float(xx[9])
-                    write2txt('band-spxdx-'+element+'.txt',str(i_nb+1)+'\t'+str(L_k_mesh_list[i_nk])+'\t'+str(energy)+'\t'+str(s)+'\t'+str(px)+'\t'+str(py)+'\t'+str(pz)+'\t'+str(dxy)+'\t'+str(dyz)+'\t'+str(dz2)+'\t'+str(dxz)+'\t'+str(dx2))
-            if mode == 1:
-                #write2txt('band-spd-'+element+'.txt',str( )+'\t')    # space
-                write2txt('band-s-'+element+'.dat',str( )+'\t')
-                write2txt('band-pxpy-'+element+'.dat',str( )+'\t')
-                write2txt('band-d-'+element+'.dat',str( )+'\t')
-            else:
-                write2txt('band-spxdx-'+element+'.txt',str( )+'\t')
+                    write2txt('band-spxdx-'+Element[i]+'.dat',str( )+'\t')
+
+        i += 1
+    hsl=high_symmetry_line(lines0,lines1)
+    for i in range(len(hsl)):
+        write2txt('high-symmetry-line.dat',str(hsl[i])+'\t'+str(-30))
+        write2txt('high-symmetry-line.dat',str(hsl[i])+'\t'+str(30))
+        write2txt('high-symmetry-line.dat',' ')
+    write2txt('high-symmetry-line.dat',str(0)+'\t'+str(0))
+    write2txt('high-symmetry-line.dat',str(hsl[len(hsl)-1])+'\t'+str(hsl[0]))
+
+    project_orbit2()
+
+
+def project_orbit2():
+    print('This part is used to operate the orbit data in PROCAR')
+    print('To choose the element')
+    structure = read_data('POSCAR')
+    print (structure[5])
+    element0 = str(input('input the kind of element:'))
+    element = element0.split()
+    i = 0
+    Norbit = []
+    while i < len(element):
+        print ('1. s 2. py 3. pz 4.px 5. dxy 6. dyz 7.dz2 8. dxz 9. x2-y2')
+        Norbit0 = str(input('input the orbit of element'+str(element[i])+ """in format '1 2 3 4'"""))
+        Norbit = Norbit0.split()
+        write2txt('projected_band.dat','1. s 2. py 3. pz 4.px 5. dxy 6. dyz 7.dz2 8. dxz 9. x2-y2')
+        write2txt('projected_band.dat','element : '+str(element[i])+'\t'+Norbit0)
+        i += 1
+    N_el = 0
+    #print ('Nor',len(Norbit))
+    while N_el < len(element):
+        orbit_file0 = read_data('band-spxdx-'+element[N_el]+'.dat')
+        for orbit_file in  orbit_file0:
+            orbit = orbit_file.split()
+            if len(orbit)==0:
+                write2txt('projected_band.dat',str('')+'\t')
+                continue
+            path = orbit[0]
+            energy = orbit[1]
+            component = 0
+            i=0
+
+            while i < len(Norbit):
+                N = int(Norbit[i])+1
+                component = component + float(orbit[N])
+                i += 1
+            write2txt('projected_band.dat',str(path)+'\t'+str(energy)+'\t'+str(component)+'\t')
+        N_el += 1
+
+
+
+
 
 # used  to read EIGENVAL file
 def read_eigenval(lines3,nk,nb,mag):
@@ -623,18 +669,71 @@ def bandstructure():
         else:
             band_hse_cal()
 
-# used to choose the mode you want to calculate
+def band_kpoint_PROCAR():
+    LSO = int(input('nosoc 1 or soc 2'))
+    ONE_kpoint = int(input('input one k-point'))
+    SOME_bands0 = str(input('input bands'))
+    SOME_bands=SOME_bands0.split()
+    procar = read_data('PROCAR')
+    procar_line2 = procar[1]
+    kpoints_bands_ions = procar_line2.split()
+    kpoints = int(kpoints_bands_ions[3])
+    bands = int(kpoints_bands_ions[7])
+    ions = int(kpoints_bands_ions[11])
+    print ('number of kpoints:',kpoints,'number of bands:',bands)
+    i=0
+    j=0
+    # To find the
+    procar_line=''
+    for procar_line in procar:
+        procar_line_detail = procar_line.split()
+        if 'k-point ' in procar_line and ONE_kpoint == int(procar_line_detail[1]) :
+                #print (procar_line_detail[1])
+                j=i
+        i+=1
+    kpoint_detail=[]
+    block = 2+bands*(4+(ions+1)*(LSO**2))-1
+    #print (j)
+    for i in range(j-1,j+block-1,1):
+        kpoint_detail.append(procar[i])
+    write2txt('procar_bands_kpoint.dat','k-points :'+'\t'+str(ONE_kpoint))
+    write2txt('procar_bands_kpoint.dat','bands :'+'\t'+str(SOME_bands0))
+    ORBIT =procar[j+4]
+    ORBIT = ORBIT[:-1]
+    write2txt('procar_bands_kpoint.dat',ORBIT)
+    i=0
+    k=0
+    #print (kpoint_detail)
+    while i < len(SOME_bands):
+        j=0
+        for component_line in kpoint_detail:
+            component=component_line.split()
+            if 'band ' in component_line and str(SOME_bands[i]) == component[1]:
+                k=j
+            j+=1
+            #print (j)
+        i+=1
+        print(k)
+        bandsx=kpoint_detail[k+ions+3]
+        bandsx=bandsx[:-1]
+        write2txt('procar_bands_kpoint.dat',bandsx)
+
+
+    # used to choose the mode you want to calculate
 while True:
     print('To choose the program that you want to use:')
     print('1. project orbit')
     print('2. band structure')
-    print('3. quit')
+    print('3. the component of some bands at one k-point')
+    print('4. quit')
     project = str(input())
     if  '1' == project :
-        print('you performing a project-orbit program ...')
+        print('you are performing a project-orbit program now.')
         project_orbit()
         continue
     elif  project == '2':
         bandstructure()
+    elif  project == '3':
+        band_kpoint_PROCAR()
     else:
         break
