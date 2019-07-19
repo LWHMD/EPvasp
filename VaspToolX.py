@@ -342,20 +342,23 @@ def project_orbit2():
     print (structure[5])
     element0 = str(input('input the kind of element:'))
     element = element0.split()
-    i = 0
+
     Norbit = []
     Name_ele = ''
-    while i < len(element):
-        print ('1. s 2. py 3. pz 4.px 5. dxy 6. dyz 7.dz2 8. dxz 9. x2-y2')
-        Norbit0 = str(input('input the orbit of element'+str(element[i])+ """in format '1 2 3 4'"""))
-        Norbit = Norbit0.split()
-        write2txt('projected_band.dat','1. s 2. py 3. pz 4.px 5. dxy 6. dyz 7.dz2 8. dxz 9. x2-y2')
-        write2txt('projected_band.dat','element : '+str(element[i])+'\t'+Norbit0)
-        i += 1
-
     N_el = 0
     while N_el < len(element):
         Name_ele=Name_ele+element[N_el]
+        N_el += 1
+    i = 0
+    while i < len(element):
+        print ('1. s 2. py 3. pz 4.px 5. dxy 6. dyz 7.dz2 8. dxz 9. x2-y2')
+        Norbit0 = str(input('input the orbit of element'+'\t'+str(element[i])+'\t'+"""in format '1 2 3 4'"""))
+        Norbit = Norbit0.split()
+        write2txt('projected_band'+Name_ele+str(Norbit[0])+'.dat','1. s 2. py 3. pz 4.px 5. dxy 6. dyz 7.dz2 8. dxz 9. x2-y2')
+        write2txt('projected_band'+Name_ele+str(Norbit[0])+'.dat','element : '+str(element[i])+'\t'+Norbit0)
+        i += 1
+
+
 
     #print ('Nor',len(Norbit))
     Ndatalines = 0
@@ -370,7 +373,7 @@ def project_orbit2():
         orbit_file_linexx = orbit_filexx[Ndatalines]
         orbitxx = orbit_file_linexx.split()
         if len(orbitxx)==0:
-            write2txt('projected_band'+Name_ele+str(Norbit)+'.dat',str('')+'\t')
+            write2txt('projected_band'+Name_ele+str(Norbit[0])+'.dat',str('')+'\t')
             Ndatalines += 1
 
         N_el = 0
@@ -390,7 +393,7 @@ def project_orbit2():
             N_el += 1
         Ndatalines += 1
         #print ('index',Ndatalines)
-        write2txt('projected_band'+Name_ele+str(Norbit)+'.dat',str(path)+'\t'+str(energy)+'\t'+str(component)+'\t')
+        write2txt('projected_band'+Name_ele+str(Norbit[0])+'.dat',str(path)+'\t'+str(energy)+'\t'+str(component)+'\t')
 
 # used  to read EIGENVAL file
 def read_eigenval(lines3,nk,nb,mag):
