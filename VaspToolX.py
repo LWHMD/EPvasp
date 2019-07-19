@@ -363,16 +363,15 @@ def project_orbit2():
     #print ('Nor',len(Norbit))
     Ndatalines = 0
     orbit_file0 = read_data('band-spxdx-'+element[0]+'.dat')
-    print (len(orbit_file0))
     while Ndatalines < len(orbit_file0)-1:
         component = 0
         path = 0
         energy=0
         #print ('element',len(element))
-        orbit_filexx = read_data('band-spxdx-'+element[0]+'.dat')
-        orbit_file_linexx = orbit_filexx[Ndatalines]
-        orbitxx = orbit_file_linexx.split()
-        if len(orbitxx)==0:
+
+        orbit_file_line0 = orbit_file0[Ndatalines]
+        orbit0 = orbit_file_line0.split()
+        if len(orbit0)==0:
             write2txt('projected_band'+Name_ele+str(Norbit[0])+'.dat',str('')+'\t')
             Ndatalines += 1
 
