@@ -350,12 +350,21 @@ def project_orbit2():
         Name_ele=Name_ele+element[N_el]
         N_el += 1
     i = 0
+    Name_orb = ''
     while i < len(element):
         print ('1. s 2. py 3. pz 4.px 5. dxy 6. dyz 7.dz2 8. dxz 9. x2-y2')
         Norbit0 = str(input('input the orbit of element'+'\t'+str(element[i])+'\t'+"""in format '1 2 3 4'"""))
         Norbit = Norbit0.split()
-        write2txt('projected_band'+Name_ele+str(Norbit[0])+'.dat','1. s 2. py 3. pz 4.px 5. dxy 6. dyz 7.dz2 8. dxz 9. x2-y2')
-        write2txt('projected_band'+Name_ele+str(Norbit[0])+'.dat','element : '+str(element[i])+'\t'+Norbit0)
+        Name_orb = ''
+        if len(Norbit) > 1:
+            No=0
+            while No < len(Norbit):
+                Name_orb=Name_orb+Norbit[No]
+                No += 1
+        else:
+            Name_orb=Norbit0
+        write2txt('projected_band'+Name_ele+Name_orb+'.dat','1. s 2. py 3. pz 4.px 5. dxy 6. dyz 7.dz2 8. dxz 9. x2-y2')
+        write2txt('projected_band'+Name_ele+Name_orb+'.dat','element : '+str(element[i])+'\t'+Norbit0)
         i += 1
 
 
@@ -372,7 +381,7 @@ def project_orbit2():
         orbit_file_line0 = orbit_file0[Ndatalines]
         orbit0 = orbit_file_line0.split()
         if len(orbit0)==0:
-            write2txt('projected_band'+Name_ele+str(Norbit[0])+'.dat',str('')+'\t')
+            write2txt('projected_band'+Name_ele+Name_orb+'.dat',str('')+'\t')
             Ndatalines += 1
 
         N_el = 0
@@ -392,7 +401,7 @@ def project_orbit2():
             N_el += 1
         Ndatalines += 1
         #print ('index',Ndatalines)
-        write2txt('projected_band'+Name_ele+str(Norbit[0])+'.dat',str(path)+'\t'+str(energy)+'\t'+str(component)+'\t')
+        write2txt('projected_band'+Name_ele+Name_orb+'.dat',str(path)+'\t'+str(energy)+'\t'+str(component)+'\t')
 
 # used  to read EIGENVAL file
 def read_eigenval(lines3,nk,nb,mag):
