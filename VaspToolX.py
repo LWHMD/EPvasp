@@ -11,7 +11,7 @@
 #              POSCAR, fermi.dat                          #
 #              KPOINTS.DFT(HSE),                          #
 # run command: python3.4 VaspToolX.py                     #
-# Author     : Leiwang  updata 2019/07/18                #
+# Author     : Leiwang  updata 2019/07/19                #
 ###########################################################
 # The version copy from ubuntu
 
@@ -344,6 +344,7 @@ def project_orbit2():
     element = element0.split()
     i = 0
     Norbit = []
+    Name_ele = ''
     while i < len(element):
         print ('1. s 2. py 3. pz 4.px 5. dxy 6. dyz 7.dz2 8. dxz 9. x2-y2')
         Norbit0 = str(input('input the orbit of element'+str(element[i])+ """in format '1 2 3 4'"""))
@@ -351,6 +352,10 @@ def project_orbit2():
         write2txt('projected_band.dat','1. s 2. py 3. pz 4.px 5. dxy 6. dyz 7.dz2 8. dxz 9. x2-y2')
         write2txt('projected_band.dat','element : '+str(element[i])+'\t'+Norbit0)
         i += 1
+
+    N_el = 0
+    while N_el < len(element):
+        Name_ele=Name_ele+element[N_el]
 
     #print ('Nor',len(Norbit))
     Ndatalines = 0
@@ -365,11 +370,11 @@ def project_orbit2():
         orbit_file_linexx = orbit_filexx[Ndatalines]
         orbitxx = orbit_file_linexx.split()
         if len(orbitxx)==0:
-            write2txt('projected_band.dat',str('')+'\t')
+            write2txt('projected_band'+Name_ele+str(Norbit)+'.dat',str('')+'\t')
             Ndatalines += 1
 
         N_el = 0
-        while N_el < len(element)-1:
+        while N_el < len(element):
             orbit_file = read_data('band-spxdx-'+element[N_el]+'.dat')
             orbit_file_line = orbit_file[Ndatalines]
             orbit = orbit_file_line.split()
@@ -385,7 +390,7 @@ def project_orbit2():
             N_el += 1
         Ndatalines += 1
         #print ('index',Ndatalines)
-        write2txt('projected_band.dat',str(path)+'\t'+str(energy)+'\t'+str(component)+'\t')
+        write2txt('projected_band'+Name_ele+str(Norbit)+'.dat',str(path)+'\t'+str(energy)+'\t'+str(component)+'\t')
 
 # used  to read EIGENVAL file
 def read_eigenval(lines3,nk,nb,mag):
@@ -707,8 +712,8 @@ def band_kpoint_PROCAR():
     #print (j)
     for i in range(j-1,j+block-1,1):
         kpoint_detail.append(procar[i])
-    write2txt('procar_bands_kpoint.dat','k-points :'+'\t'+str(ONE_kpoint))
-    write2txt('procar_bands_kpoint.dat','bands :'+'\t'+str(SOME_bands0))
+    write2txt('procar_bands_kpoint'+str(ONE_kpoint)+'.dat','k-points :'+'\t'+str(ONE_kpoint))
+    write2txt('procar_bands_kpoint'+str(ONE_kpoint)+'.dat','bands :'+'\t'+str(SOME_bands0))
     ORBIT =procar[j+4]
     ORBIT = ORBIT[:-1]
     write2txt('procar_bands_kpoint'+str(ONE_kpoint)+'.dat',ORBIT)
