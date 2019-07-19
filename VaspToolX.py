@@ -351,30 +351,41 @@ def project_orbit2():
         write2txt('projected_band.dat','1. s 2. py 3. pz 4.px 5. dxy 6. dyz 7.dz2 8. dxz 9. x2-y2')
         write2txt('projected_band.dat','element : '+str(element[i])+'\t'+Norbit0)
         i += 1
-    N_el = 0
+
     #print ('Nor',len(Norbit))
-    while N_el < len(element):
-        orbit_file0 = read_data('band-spxdx-'+element[N_el]+'.dat')
-        for orbit_file in  orbit_file0:
-            orbit = orbit_file.split()
-            if len(orbit)==0:
-                write2txt('projected_band.dat',str('')+'\t')
-                continue
+    Ndatalines = 0
+    orbit_file0 = read_data('band-spxdx-'+element[0]+'.dat')
+    print (len(orbit_file0))
+    while Ndatalines < len(orbit_file0)-1:
+        component = 0
+        path = 0
+        energy=0
+        #print ('element',len(element))
+        orbit_filexx = read_data('band-spxdx-'+element[0]+'.dat')
+        orbit_file_linexx = orbit_filexx[Ndatalines]
+        orbitxx = orbit_file_linexx.split()
+        if len(orbitxx)==0:
+            write2txt('projected_band.dat',str('')+'\t')
+            Ndatalines += 1
+
+        N_el = 0
+        while N_el < len(element)-1:
+            orbit_file = read_data('band-spxdx-'+element[N_el]+'.dat')
+            orbit_file_line = orbit_file[Ndatalines]
+            orbit = orbit_file_line.split()
+
             path = orbit[0]
             energy = orbit[1]
-            component = 0
             i=0
-
+            #print('orbit',len(Norbit))
             while i < len(Norbit):
                 N = int(Norbit[i])+1
                 component = component + float(orbit[N])
                 i += 1
-            write2txt('projected_band.dat',str(path)+'\t'+str(energy)+'\t'+str(component)+'\t')
-        N_el += 1
-
-
-
-
+            N_el += 1
+        Ndatalines += 1
+        #print ('index',Ndatalines)
+        write2txt('projected_band.dat',str(path)+'\t'+str(energy)+'\t'+str(component)+'\t')
 
 # used  to read EIGENVAL file
 def read_eigenval(lines3,nk,nb,mag):
@@ -700,7 +711,7 @@ def band_kpoint_PROCAR():
     write2txt('procar_bands_kpoint.dat','bands :'+'\t'+str(SOME_bands0))
     ORBIT =procar[j+4]
     ORBIT = ORBIT[:-1]
-    write2txt('procar_bands_kpoint.dat',ORBIT)
+    write2txt('procar_bands_kpoint'+str(ONE_kpoint)+'.dat',ORBIT)
     i=0
     k=0
     #print (kpoint_detail)
@@ -715,8 +726,8 @@ def band_kpoint_PROCAR():
         i+=1
         bandsx=kpoint_detail[k+ions+3]
         bandsx=bandsx[:-1]
-        write2txt('procar_bands_kpoint.dat',bandsx)
-    write2txt('procar_bands_kpoint.dat','') #empty line
+        write2txt('procar_bands_kpoint'+str(ONE_kpoint)+'.dat',bandsx)
+    write2txt('procar_bands_kpoint'+str(ONE_kpoint)+'.dat','') #empty line
 
     i=0
     while i < len(SOME_bands):
@@ -728,7 +739,7 @@ def band_kpoint_PROCAR():
                 for x in range(k-1,k+ions+4,1):
                     bandsx=kpoint_detail[x]
                     bandsx=bandsx[:-1]
-                    write2txt('procar_bands_kpoint.dat',bandsx)
+                    write2txt('procar_bands_kpoint'+str(ONE_kpoint)+'.dat',bandsx)
             j+=1
         i+=1
 
@@ -737,18 +748,21 @@ def band_kpoint_PROCAR():
     # used to choose the mode you want to calculate
 while True:
     print('To choose the program that you want to use:')
-    print('1. project orbit')
-    print('2. band structure')
-    print('3. the component of some bands at one k-point')
-    print('4. quit')
+    print('1. project orbit (step1)')
+    print('2. project orbit (step2)')
+    print('3. band structure')
+    print('4. the component of some bands at one k-point')
+    print('5. quit')
     project = str(input())
     if  '1' == project :
         print('you are performing a project-orbit program now.')
         project_orbit()
         continue
     elif  project == '2':
-        bandstructure()
+        project_orbit2()
     elif  project == '3':
+        bandstructure()
+    elif  project == '4':
         band_kpoint_PROCAR()
     else:
         break
